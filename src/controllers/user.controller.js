@@ -41,10 +41,10 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // check images, avatar
   const avatarLocalPath = req.files?.avatar ? req.files.avatar[0]?.path : null;
-  const coverImageLocalPath = req.files?.coverImageLocalPath
-    ? req.files.coverImageLocalPath[0]?.path
-    : null;
-
+  let coverImageLocalPath;
+  if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+      coverImageLocalPath = req.files.coverImage[0].path
+  }
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
@@ -55,6 +55,7 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required");
   }
+  
 
   // create user object - create entry in db
   const user = await User.create({
@@ -167,7 +168,7 @@ const logoutUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .clearCookie("accessToken", options)
-    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
     .json(new ApiResponse(200, {}, "User logged out"));
 });
 
